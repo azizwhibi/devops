@@ -7,11 +7,9 @@ pipeline {
     }
 
     environment {
-        // Use your Docker Hub repo name
-        DOCKER_IMAGE = "azizwhibi/devopspipeline:latest"
-        DOCKER_REGISTRY = "docker.io"
-        // This must match the ID you configured in Jenkins credentials
-        DOCKER_CREDENTIALS = "1"
+        DOCKER_IMAGE       = "azizwhibi/devopspipeline:latest"
+        DOCKER_REGISTRY    = "docker.io"
+        DOCKER_CREDENTIALS = "1"                 // DockerHub credentials ID
     }
 
     stages {
@@ -27,11 +25,33 @@ pipeline {
             }
         }
 
+        stage('SonarQube Analysis') {
+            environment {
+                SCANNER_HOME = tool 'SonarScanner'   // Jenkins tool name
+            }
+            steps {
+                withSonarQubeEnv('SonarQube') {      // Jenkins Sonar server name
+                    sh '''
+                      $SCANNER_HOME/bin/sonar-scanner \
+                        -Dsonar.projectKey=devops \
+                        -Dsonar.sources=src \
+                        -Dsonar.java.binaries=target/classes
+                    '''
+                }
+            }
+        }
+
+        stage('Quality Gate') {
+            steps {
+                timeout(time: 5, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
+
         stage('Build Docker Image') {
             steps {
                 sh "docker build -t ${DOCKER_IMAGE} -f docker/Dockerfile ."
-                // If your Dockerfile is at project root, use:
-                // sh "docker build -t ${DOCKER_IMAGE} ."
             }
         }
 
