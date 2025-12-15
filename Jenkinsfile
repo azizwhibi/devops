@@ -8,10 +8,10 @@ pipeline {
 
     environment {
         // Use your Docker Hub repo name
-        DOCKER_IMAGE = "azizwhibi/devops:latest"
+        DOCKER_IMAGE = "azizwhibi/devopspipeline:latest"
         DOCKER_REGISTRY = "docker.io"
         // This must match the ID you configured in Jenkins credentials
-        DOCKER_CREDENTIALS = "dockerhub-azizwhibi"
+        DOCKER_CREDENTIALS = "1"
     }
 
     stages {
