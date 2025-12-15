@@ -9,7 +9,7 @@ pipeline {
     environment {
         DOCKER_IMAGE       = "azizwhibi/devopspipeline:latest"
         DOCKER_REGISTRY    = "docker.io"
-        DOCKER_CREDENTIALS = "1"                 // DockerHub credentials ID
+        DOCKER_CREDENTIALS = "1"   // DockerHub credentials ID in Jenkins
     }
 
     stages {
@@ -27,12 +27,15 @@ pipeline {
 
         stage('SonarQube Analysis') {
             environment {
-                SCANNER_HOME = tool 'SonarScanner'   // Jenkins tool name
+                SCANNER_HOME = tool 'SonarScanner'   // maps to SONAR_RUNNER_HOME you configured
             }
             steps {
-                withSonarQubeEnv('SonarQube') {      // Jenkins Sonar server name
+                withSonarQubeEnv('SonarQube') {      // Jenkins SonarQube server name
                     sh '''
-                      $SCANNER_HOME/bin/sonar-scanner \
+                      echo "SCANNER_HOME=$SCANNER_HOME"
+                      ls -R "$SCANNER_HOME"
+
+                      "$SCANNER_HOME/bin/sonar-scanner" \
                         -Dsonar.projectKey=devops \
                         -Dsonar.sources=src \
                         -Dsonar.java.binaries=target/classes
