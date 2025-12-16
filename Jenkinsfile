@@ -94,15 +94,15 @@ pipeline {
 stage('Deploy to Kubernetes') {
     steps {
         sh '''
-          export KUBECONFIG=/home/vagrant/.kube/config
+          export KUBECONFIG=/var/lib/jenkins/.kube/config
 
           kubectl get nodes
-
           kubectl apply -n devops -f /home/vagrant/kub/mysql-deployment.yaml
           kubectl apply -n devops -f /home/vagrant/kub/spring-deployment.yaml
         '''
     }
 }
+
 
     }
 
