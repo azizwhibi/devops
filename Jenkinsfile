@@ -22,7 +22,18 @@ pipeline {
 
         stage('Build with Maven') {
             steps {
-                sh 'mvn clean package -DskipTests'
+                sh 'mvn clean package'   // no -DskipTests
+            }
+        }
+
+        stage('Run Unit Tests') {
+            steps {
+                sh 'mvn test'
+            }
+            post {
+                always {
+                    junit 'target/surefire-reports/*.xml'
+                }
             }
         }
 
@@ -91,19 +102,18 @@ pipeline {
                 }
             }
         }
-stage('Deploy to Kubernetes') {
-    steps {
-        sh '''
-          export KUBECONFIG=/var/lib/jenkins/.kube/config
 
-          kubectl get nodes
-          kubectl apply -n devops -f /var/lib/jenkins/kub/mysql-deployment.yaml
-          kubectl apply -n devops -f /var/lib/jenkins/kub/spring-deployment.yaml
-        '''
-    }
-}
+        stage('Deploy to Kubernetes') {
+            steps {
+                sh '''
+                  export KUBECONFIG=/var/lib/jenkins/.kube/config
 
-
+                  kubectl get nodes
+                  kubectl apply -n devops -f /var/lib/jenkins/kub/mysql-deployment.yaml
+                  kubectl apply -n devops -f /var/lib/jenkins/kub/spring-deployment.yaml
+                '''
+            }
+        }
     }
 
     post {
