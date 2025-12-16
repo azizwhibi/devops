@@ -17,7 +17,8 @@ spec:
         - name: nexus-secret        # ← ADD HERE
       containers:
         - name: student-app
-          image: 192.168.33.10:8085/docker-repo/devopspipeline:latest
+          image: image: 192.168.33.10:8081/docker-hosted/devopspipeline:latest
+
           ports:
             - containerPort: 8080
           env:
