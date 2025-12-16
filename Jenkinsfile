@@ -6,12 +6,12 @@ pipeline {
         maven 'M2_HOME'
     }
 
-    environment {
-        // Nexus Docker registry
-        DOCKER_REGISTRY    = "192.168.33.10:8083"
-        DOCKER_IMAGE       = "${DOCKER_REGISTRY}/devopspipeline:latest"
-        DOCKER_CREDENTIALS = "nexus-creds"   // Jenkins cred ID for Nexus Docker
-    }
+environment {
+    DOCKER_REGISTRY    = "192.168.33.10:8081"
+    DOCKER_REPO_PATH   = "repository/docker-hosted"
+    DOCKER_IMAGE       = "${DOCKER_REGISTRY}/${DOCKER_REPO_PATH}/devopspipeline:latest"
+    DOCKER_CREDENTIALS = "nexus-creds"
+}
 
     stages {
         stage('Checkout Git') {
