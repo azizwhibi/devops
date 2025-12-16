@@ -91,16 +91,19 @@ pipeline {
                 }
             }
         }
+stage('Deploy to Kubernetes') {
+    steps {
+        sh '''
+          export KUBECONFIG=/home/vagrant/.kube/config
 
-        stage('Deploy to Kubernetes') {
-            steps {
-                sh '''
-                  kubectl config use-context minikube
-                  kubectl apply -n devops -f /home/vagrant/kub/mysql-deployment.yaml
-                  kubectl apply -n devops -f /home/vagrant/kub/spring-deployment.yaml
-                '''
-            }
-        }
+          kubectl get nodes
+
+          kubectl apply -n devops -f /home/vagrant/kub/mysql-deployment.yaml
+          kubectl apply -n devops -f /home/vagrant/kub/spring-deployment.yaml
+        '''
+    }
+}
+
     }
 
     post {
