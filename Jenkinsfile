@@ -10,7 +10,7 @@ pipeline {
         // Nexus Docker registry
         DOCKER_REGISTRY    = "192.168.33.10:8085"
         DOCKER_IMAGE       = "${DOCKER_REGISTRY}/devopspipeline:latest"
-        DOCKER_CREDENTIALS = "nexus-docker-creds"   // Jenkins cred ID for Nexus Docker
+        DOCKER_CREDENTIALS = "nexus-creds"   // Jenkins cred ID for Nexus Docker
     }
 
     stages {
