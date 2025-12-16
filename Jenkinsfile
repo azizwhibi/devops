@@ -7,9 +7,10 @@ pipeline {
     }
 
     environment {
-        DOCKER_IMAGE       = "azizwhibi/devopspipeline:latest"
-        DOCKER_REGISTRY    = "docker.io"
-        DOCKER_CREDENTIALS = "1"   // DockerHub credentials ID in Jenkins
+        // Nexus Docker registry
+        DOCKER_REGISTRY    = "192.168.33.10:8085"
+        DOCKER_IMAGE       = "${DOCKER_REGISTRY}/devopspipeline:latest"
+        DOCKER_CREDENTIALS = "nexus-docker-creds"   // Jenkins cred ID for Nexus Docker
     }
 
     stages {
@@ -27,10 +28,10 @@ pipeline {
 
         stage('SonarQube Analysis') {
             environment {
-                SCANNER_HOME = tool 'SonarScanner'   // maps to SONAR_RUNNER_HOME you configured
+                SCANNER_HOME = tool 'SonarScanner'
             }
             steps {
-                withSonarQubeEnv('SonarQube') {      // Jenkins SonarQube server name
+                withSonarQubeEnv('SonarQube') {
                     sh '''
                       echo "SCANNER_HOME=$SCANNER_HOME"
                       ls -R "$SCANNER_HOME"
@@ -62,26 +63,27 @@ pipeline {
             steps {
                 withCredentials([usernamePassword(
                     credentialsId: DOCKER_CREDENTIALS,
-                    passwordVariable: 'DOCKER_PASS',
-                    usernameVariable: 'DOCKER_USER'
+                    passwordVariable: 'NEXUS_PASS',
+                    usernameVariable: 'NEXUS_USER'
                 )]) {
                     script {
                         int retries = 3
                         for (int i = 1; i <= retries; i++) {
                             try {
-                                sh '''
+                                sh """
                                     set -e
                                     export DOCKER_CLIENT_TIMEOUT=300
                                     export COMPOSE_HTTP_TIMEOUT=300
-                                    echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                                    echo "\$NEXUS_PASS" | docker login ${DOCKER_REGISTRY} -u "\$NEXUS_USER" --password-stdin
                                     docker push ${DOCKER_IMAGE}
-                                '''
-                                echo "Docker push succeeded on attempt ${i}"
+                                    docker logout ${DOCKER_REGISTRY}
+                                """
+                                echo "Docker push to Nexus succeeded on attempt ${i}"
                                 break
                             } catch (err) {
-                                echo "Push attempt ${i} failed. Retrying..."
+                                echo "Push attempt ${i} to Nexus failed. Retrying..."
                                 if (i == retries) {
-                                    error("Docker push failed after ${retries} attempts")
+                                    error("Docker push to Nexus failed after ${retries} attempts")
                                 }
                             }
                         }
